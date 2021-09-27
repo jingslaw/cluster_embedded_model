@@ -73,9 +73,9 @@ def build_cluster(structure, cluster_r, doped_atom_type=None, center=None, core_
                 flag = 0
                 for i in range(1, 5):
                     temp = []
-                    if flag != 0:
-                        break
                     for item in neighbors[i]:
+                        if flag != 0:
+                            break
                         atom = item[0]
                         if nearest_name == atom.type:
                             if not hasattr(atom, 'pseudo'):
@@ -253,21 +253,21 @@ def write_seward_input(structure, core_pseudo, mosaic_pseudo, charge, mosaic_r, 
                                                                                charge='{:10.4f}'.format(q))
     string = string + 'AMFI\nSDIPOLE\nEnd of input \n'
     if count > 500:
-        print('\nWARNING: The default max active atoms number in MOLCAS is 500, you have {0} active atoms in core'
+        print('\nWARNING: The default max active atoms number in MOLCAS is 500, you have {0} active atoms in core '
               'and mosaic structure. This may cause ERROR *RdCtl: Increase Mxdc* in sew calculation\n'.format(count))
     with open(file_name, 'w') as fp:
         fp.write(string)
 
 
 if __name__ == '__main__':
-    doped_crystal = '2Tisc960.vasp'
+    doped_crystal = 'o-o-o-c.vasp'
     substrate = 'hostsc960.vasp'
-    c_r = 6
-    s_r = 16
-    m_r = 9
+    c_r = 7
+    s_r = 28
+    m_r = 9.9
     doped_structure = poscar(doped_crystal)
     substrate_structure = poscar(substrate)
-    doped_cluster, doped_center = build_cluster(doped_structure, c_r, tolerance=0.5)
+    doped_cluster, doped_center = build_cluster(doped_structure, c_r, tolerance=0.1)
     discard = cluster_from_substrate(substrate_structure, doped_center, c_r)
     if len(doped_cluster) != len(discard):
         print('WARNING: \n'
@@ -276,6 +276,7 @@ if __name__ == '__main__':
               'choose of radius.\n'
               'The radius of cluster may be too small. Some atoms at the edge of sphere may be move out of the sphere'
               'after the relaxed doped structure\n')
+        print('The number of difference is {0}'.format(len(doped_cluster) - len(discard)))
     shell = build_shell(substrate_structure, doped_center, c_r, s_r, pure_substrate=False, remove_dict={'Ti': 'Al'})
     cluster_embedded_structure = build_mosaic_structure(doped_cluster, shell)
 

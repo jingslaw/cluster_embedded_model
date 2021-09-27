@@ -107,12 +107,12 @@ def the_potential_from_onion(location, onion, charge, distance_tolerance=0.1):
 
 
 if __name__ == "__main__":
-    doped_crystal = '2Tisc960.vasp'
+    doped_crystal = 'o-o-o-c.vasp'
     substrate = 'hostsc960.vasp'
     doped_atom_type = None
     doped_center = None
-    max_shell_r = 60
-    cluster_r = 9
+    max_shell_r = 67
+    min_shell_r = 7
     q = {'Al': 3, 'O': -2}
 
     doped_structure = poscar(doped_crystal)
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         if atom.type == doped_atom_type:
             doped_atoms.append(atom)
     supercell = extend_structure(substrate_structure, max_shell_r, pure_substrate=True, remove_dict=None)
-    point_charge_structure = get_onion_structure_from_supercell(supercell, doped_center, [cluster_r, max_shell_r])
+    point_charge_structure = get_onion_structure_from_supercell(supercell, doped_center, [min_shell_r, max_shell_r])
     potential_result = []
     for atom in doped_atoms:
         potentials = the_potential_from_onion(atom.pos, point_charge_structure, q, distance_tolerance=0.1)

@@ -34,6 +34,9 @@ def distance_of_center_and_surface(center, cell):
     distance_ab = abs(np.dot(center, norm_v_ab))
     distance_bc = abs(np.dot(center, norm_v_bc))
     distance_ca = abs(np.dot(center, norm_v_ca))
+    distance_ab = min(distance_ab, np.linalg.norm(cell[2]) - distance_ab)
+    distance_bc = min(distance_bc, np.linalg.norm(cell[0]) - distance_bc)
+    distance_ca = min(distance_ca, np.linalg.norm(cell[1]) - distance_ca)
     return distance_ab, distance_bc, distance_ca
 
 
@@ -54,7 +57,9 @@ def build_cluster(structure, cluster_r, doped_atom_type=None, center=None, core_
         center = position/num
     if cluster_r > min(distance_of_center_and_surface(center, structure.cell.T)):
         print('\nERROR: the cluster is out range of the CONTCAR supercell structure. '
-              'Please use a bigger supercell or a smaller cluster_r parameter\n')
+              'The smallest distance between center and surface is * {0} *.'
+              'Please use a bigger supercell or a smaller cluster_r parameter\n'
+              .format(min(distance_of_center_and_surface(center, structure.cell.T))))
         exit(1)
 
     cluster = Structure(structure.cell, scale=structure.scale)
@@ -76,9 +81,9 @@ def build_cluster(structure, cluster_r, doped_atom_type=None, center=None, core_
                 flag = 0
                 for i in range(1, 5):
                     temp = []
-                    if flag != 0:
-                        break
                     for item in neighbors[i]:
+                        if flag != 0:
+                            break
                         atom = item[0]
                         if nearest_name == atom.type:
                             if not hasattr(atom, 'pseudo'):
@@ -151,15 +156,15 @@ def write_compare_result_in_json(compare_result, filename='structure compare.jso
 
 
 if __name__ == '__main__':
-    doped_crystal = '2Tisc960.vasp'
-    substrate = 'hostsc960.vasp'
+    doped_crystal = 'TiAl0sc120.vasp'
+    substrate = 'hostsc120.vasp'
     save = ''
-    c_r = 8
+    c_r = 2.5
 
     doped_structure = poscar(doped_crystal)
     substrate_structure = poscar(substrate)
     arrow_location, arrow, doped_atoms = structure_compare(save, substrate_structure, doped_structure,
-                                                           tolerance=1, percent=10)
+                                                           tolerance=1, percent=1)
     write_compare_result_in_json(doped_atoms)
 
     doped_cluster, doped_center = build_cluster(doped_structure, c_r, tolerance=0.5)
@@ -171,10 +176,28 @@ if __name__ == '__main__':
               'choose of radius.\n'
               'The radius of cluster may be too small. Some atoms at the edge of sphere may be move out of the sphere'
               'after the relaxed doped structure\n')
+        print('The number of difference is {0}'.format(len(doped_cluster) - len(discard)))
 
     figure = plt.figure()
     ax = figure.add_subplot(111, projection='3d')
     draw_crystal_in_ax(ax, substrate_structure, atoms_plot=False)
     plot_sphere(ax, doped_center, c_r)
     ax.quiver(arrow_location[0], arrow_location[1], arrow_location[2], arrow[0], arrow[1], arrow[2])
+
+    tmp = []
+    outer = []
+    arrow_location = arrow_location.T
+    arrow = arrow.T
+    for i in range(len(doped_structure)):
+        if np.linalg.norm(arrow_location[i]-doped_center) <= c_r:
+            tmp.append(np.linalg.norm(arrow[i]))
+        else:
+            outer.append(np.linalg.norm(arrow[i]))
+    with open('test.txt', 'w+') as fp:
+        for item in tmp:
+            fp.writelines('{0}\n'.format(item))
+        fp.writelines('\n\n')
+        for item in outer:
+            fp.writelines('{0}\n'.format(item))
+
     plt.show()

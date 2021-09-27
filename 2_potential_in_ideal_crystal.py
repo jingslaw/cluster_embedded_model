@@ -44,7 +44,7 @@ def read_compared_result_from_json(filename='structure compare.json'):
 
 
 if __name__ == "__main__":
-    doped_crystal = '2Tisc960.vasp'
+    doped_crystal = 'o-o-o-c.vasp'
     substrate = 'hostsc960.vasp'
     unit_cell_file = 'primitive.vasp'
     doped_element = 'Ti'
@@ -63,6 +63,8 @@ if __name__ == "__main__":
                     for atom in pairs:
                         if atom.type == doped_element:
                             original.append(atom)
+                for atom in element['int']:
+                    original.append(atom)
     else:
         doped_atoms = compare_structure(substrate_structure, doped_structure, tolerance=1.0, compare_type='M')
         for element in doped_atoms:
@@ -73,8 +75,8 @@ if __name__ == "__main__":
                             original.append(atom)
 
     atom_list = [[], []]
-    multiplier = (100, 100, 100)
-    eta = 0.1 * 2 * np.pi
+    multiplier = (200, 200, 200)
+    eta = 10 * 2 * np.pi
     p_matrix = np.array([[0, -1, 2], [-3, 1, 1], [0, -2, 0]]) * 2
     charge = {'Al': 3, 'O': -2}
 
