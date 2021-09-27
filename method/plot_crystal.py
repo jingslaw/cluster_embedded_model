@@ -49,7 +49,7 @@ def plot_cube(ax, cube_definition):
     # Plot the points themselves to force the scaling of the axes
     ax.scatter(points[:, 0], points[:, 1], points[:, 2], s=0)
 
-    ax.set_aspect('equal')
+    ax.set_aspect('auto')
 
 
 def get_atom_detail(atom_name):
@@ -142,4 +142,4 @@ def plot_sphere(ax, center, radius):
     x = radius * np.cos(u) * np.sin(v) + center[0]
     y = radius * np.sin(u) * np.sin(v) + center[1]
     z = radius * np.cos(v) + center[2]
-    ax.plot_wireframe(x, y, z, color="black")
+    ax.plot_wireframe(x, y, z, color="black", linewidth=0.5)

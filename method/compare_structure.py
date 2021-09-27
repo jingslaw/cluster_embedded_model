@@ -212,6 +212,7 @@ def structure_compare(save_path, host, doped, tolerance=1.0, percent=10):
     write_compare_result(save_path, result)
     temp = []
     for element in result:
+        # bug: seems can not find the rest atom as vacancy
         temp += element.unchanged + element.sub
     arrow_location = np.array([0, 0, 0])
     arrow = np.array([0, 0, 0])
